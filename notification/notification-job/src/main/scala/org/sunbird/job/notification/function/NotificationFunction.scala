@@ -7,8 +7,11 @@ import com.fasterxml.jackson.core.JsonProcessingException
 import com.fasterxml.jackson.core.`type`.TypeReference
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.scala.{DefaultScalaModule, ScalaObjectMapper}
+import org.apache.commons.lang3.StringUtils
 import org.apache.flink.configuration.Configuration
 import org.apache.flink.streaming.api.functions.KeyedProcessFunction
+import org.apache.velocity.{Template, VelocityContext}
+import org.apache.velocity.app.VelocityEngine
 import org.slf4j.LoggerFactory
 import org.sunbird.job.{BaseProcessKeyedFunction, Metrics}
 import org.sunbird.job.notification.task.NotificationConfig
@@ -16,6 +19,9 @@ import org.sunbird.job.notification.domain.{Event, NotificationMessage, Notifica
 import org.sunbird.job.notification.util.datasecurity.OneWayHashing
 import org.sunbird.notification.beans.EmailRequest
 import org.sunbird.notification.utils.FCMResponse
+
+import java.io.StringWriter
+import java.util.Properties
 
 class NotificationFunction(config: NotificationConfig,  @transient var notificationUtil: NotificationUtil = null) extends BaseProcessKeyedFunction[String, Event, String](config) {
     
@@ -47,6 +53,7 @@ class NotificationFunction(config: NotificationConfig,  @transient var notificat
     val MID = "mid"
     val SUBJECT = "subject"
     val ITERATION = "iteration"
+    val PARAMS = "params"
     
     
     override def open(parameters: Configuration): Unit = {
@@ -115,8 +122,8 @@ class NotificationFunction(config: NotificationConfig,  @transient var notificat
         if (maxIterations == 0) maxIterations = MAXITERTIONCOUNT
         maxIterations
     }
-    
-    def sendEmailNotification(notificationMap: scala.collection.immutable.HashMap[String, AnyRef]) = {
+
+    def sendEmailNotification(notificationMap: scala.collection.immutable.HashMap[String, AnyRef]): Boolean = {
         import scala.collection.JavaConverters._
         logger.info("NotificationService:sendEmailNotification map: "+ notificationMap)
         val emailIds : util.List[String] = notificationMap.get(IDS).get.asInstanceOf[List[String]].asJava
@@ -124,9 +131,60 @@ class NotificationFunction(config: NotificationConfig,  @transient var notificat
         val templateMap : util.Map[String, AnyRef] = notificationMap.get(TEMPLATE).get.asInstanceOf[scala.collection.immutable.Map[String, AnyRef]].asJava
         val config = notificationMap.get(CONFIG).get.asInstanceOf[scala.collection.immutable.Map[String, AnyRef]].asJava
         val subject = config.get(SUBJECT).asInstanceOf[String]
-        val emailText = templateMap.get(DATA).asInstanceOf[String]
-        val emailRequest = new EmailRequest(subject, emailIds, null, null, "", emailText, null)
-        notificationUtil.sendEmail(emailRequest)
+        var emailText=new String()
+        if(templateMap.get(DATA)!=null){
+            emailText = templateMap.get(DATA).asInstanceOf[String]
+        }else{
+            if(templateMap.get(ID)!=null){
+                emailText = readVm(templateMap.get(ID).toString,templateMap.get(PARAMS).asInstanceOf[scala.collection.immutable.Map[String, AnyRef]].asJava)
+            }
+        }
+        if(StringUtils.isNotEmpty(emailText)){
+            val emailRequest = new EmailRequest(subject, emailIds, null, null, "", emailText, null)
+            return notificationUtil.sendEmail(emailRequest)
+        }
+        false
+    }
+
+    def readVm(templateName: String, node: util.Map[String, AnyRef]): String = {
+        val engine: VelocityEngine = new VelocityEngine()
+        val context: VelocityContext = getContextObj(node)
+        val props: Properties = new Properties()
+        props.setProperty("resource.loader", "class");
+        props.setProperty("class.resource.loader.class", "org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader");
+        var writer: StringWriter = null
+        var body = new String()
+        val TEMPLATE_SUFFIX = ".vm"
+        try {
+            engine.init(props)
+            val templates: Template = engine.getTemplate("templates/" + templateName + TEMPLATE_SUFFIX)
+            writer = new StringWriter()
+            templates.merge(context, writer)
+            body = writer.toString
+        } catch {
+            case e: Exception => e.printStackTrace()
+                logger.error(" Failed to load velocity template =" + templateName)
+        } finally {
+            if (writer != null) {
+                try {
+                    writer.close()
+                } catch {
+                    case e: Exception => e.printStackTrace()
+                        logger.error("Failed to closed writer object =" + e.getMessage)
+                }
+            }
+        }
+        body
+    }
+
+    def getContextObj(node: util.Map[String, AnyRef]): VelocityContext = {
+        var context: VelocityContext = null
+        if (node != null) {
+            context = new VelocityContext(node)
+        } else {
+            context = new VelocityContext()
+        }
+        context
     }
     
     def sendSmsNotification(notificationMap: scala.collection.immutable.HashMap[String, AnyRef], msgId: String) = {
