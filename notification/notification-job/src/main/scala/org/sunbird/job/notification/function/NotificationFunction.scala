@@ -125,21 +125,19 @@ class NotificationFunction(config: NotificationConfig,  @transient var notificat
 
     def sendEmailNotification(notificationMap: scala.collection.immutable.HashMap[String, AnyRef]): Boolean = {
         import scala.collection.JavaConverters._
-        logger.info("NotificationService:sendEmailNotification map: "+ notificationMap)
-        val emailIds : util.List[String] = notificationMap.get(IDS).get.asInstanceOf[List[String]].asJava
-        logger.info("NotificationService:sendEmailNotification emailids: "+ emailIds)
-        val templateMap : util.Map[String, AnyRef] = notificationMap.get(TEMPLATE).get.asInstanceOf[scala.collection.immutable.Map[String, AnyRef]].asJava
+        logger.info("NotificationService:sendEmailNotification map: " + notificationMap)
+        val emailIds: util.List[String] = notificationMap.get(IDS).get.asInstanceOf[List[String]].asJava
+        logger.info("NotificationService:sendEmailNotification emailids: " + emailIds)
+        val templateMap: util.Map[String, AnyRef] = notificationMap.get(TEMPLATE).get.asInstanceOf[scala.collection.immutable.Map[String, AnyRef]].asJava
         val config = notificationMap.get(CONFIG).get.asInstanceOf[scala.collection.immutable.Map[String, AnyRef]].asJava
         val subject = config.get(SUBJECT).asInstanceOf[String]
-        var emailText=new String()
-        if(templateMap.get(DATA)!=null){
+        var emailText = new String()
+        if (templateMap.get(DATA) != null) {
             emailText = templateMap.get(DATA).asInstanceOf[String]
-        }else{
-            if(templateMap.get(ID)!=null){
-                emailText = readVm(templateMap.get(ID).toString,templateMap.get(PARAMS).asInstanceOf[scala.collection.immutable.Map[String, AnyRef]].asJava)
-            }
+        } else if (templateMap.get(ID) != null) {
+            emailText = readVm(templateMap.get(ID).toString, templateMap.get(PARAMS).asInstanceOf[scala.collection.immutable.Map[String, AnyRef]].asJava)
         }
-        if(StringUtils.isNotEmpty(emailText)){
+        if (StringUtils.isNotEmpty(emailText)) {
             val emailRequest = new EmailRequest(subject, emailIds, null, null, "", emailText, null)
             return notificationUtil.sendEmail(emailRequest)
         }
