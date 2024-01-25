@@ -29,15 +29,18 @@ public class SmtpEMailServiceImpl implements IEmailService {
       return false;
       // either email object has bcc or to list size more than 1 then pass it as bcc.
     } else if (CollectionUtils.isNotEmpty(emailReq.getBcc()) || emailReq.getTo().size() > 1) {
+      logger.info("Into code block with bcc value");
       return email.sendEmail(
           email.getFromEmail(),
           emailReq.getSubject(),
           emailReq.getBody(),
           CollectionUtils.isEmpty(emailReq.getBcc()) ? emailReq.getTo() : emailReq.getBcc());
     } else if (CollectionUtils.isNotEmpty(emailReq.getCc())) {
+      logger.info("Into code block with cc value");
       return email.sendMail(
           emailReq.getTo(), emailReq.getSubject(), emailReq.getBody(), emailReq.getCc());
     } else {
+      logger.info("Into default code block");
       return email.sendMail(emailReq.getTo(), emailReq.getSubject(), emailReq.getBody());
     }
   }
