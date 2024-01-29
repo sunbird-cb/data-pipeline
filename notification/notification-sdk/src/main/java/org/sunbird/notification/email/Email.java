@@ -114,7 +114,9 @@ public class Email {
      */
     props.put("mail.smtp.auth", "true");
     props.put("mail.smtp.port", port);
+    logger.info("The value of TLS Enabled is : " + isTlsEnabled);
     if ("true".equalsIgnoreCase(isTlsEnabled)) {
+      logger.info("Values for TLS enabling being set");
       props.put("mail.smtp.starttls.enable", "true");
       props.put("mail.smtp.ssl.protocols", "TLSv1.2");
     }
