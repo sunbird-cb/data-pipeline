@@ -78,6 +78,7 @@ public class Email {
     password = Util.readValue(Constants.EMAIL_SERVER_PASSWORD);
     fromEmail = Util.readValue(Constants.EMAIL_SERVER_FROM);
     isTlsEnabled = Util.readValue(Constants.Is_TLS_Enable);
+    logger.info("TLS enabled is : " + isTlsEnabled);
     if (StringUtils.isBlank(host)
         || StringUtils.isBlank(port)
         || StringUtils.isBlank(userName)
