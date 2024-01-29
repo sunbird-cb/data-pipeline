@@ -100,6 +100,7 @@ public class Email {
 
   private Session getSession() {
     if (session == null) {
+      logger.info("props Value being set, props : " + props);
       session = Session.getInstance(props, new GMailAuthenticator(userName, password));
     }
     return session;
