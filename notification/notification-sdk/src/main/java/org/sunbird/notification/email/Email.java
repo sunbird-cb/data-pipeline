@@ -196,6 +196,7 @@ public class Email {
       addRecipient(message, Message.RecipientType.BCC, bccList);
       setMessageAttribute(message, fromEmail, subject, body);
       sentStatus = sendEmail(session, message);
+      logger.info("status of mail sent is : " + sentStatus);
     } catch (Exception e) {
       sentStatus = false;
       logger.error("SendMail:sendMail: Exception occurred with message = " + e.getMessage(), e);
@@ -252,6 +253,11 @@ public class Email {
       transport = session.getTransport("smtp");
       transport.connect(host, userName, password);
       transport.sendMessage(message, message.getAllRecipients());
+      logger.info("Host values is : " + host + "Username : " + userName + "pasword : " + password);
+      logger.info("Recepient list size : " + message.getAllRecipients().length + " Sender Value is : "  + message.getSender());
+      logger.info("Transport URL : " + transport.getURLName());
+      logger.info("Session Value SMTP Protocol : " + session.getProperty("mail.smtp.ssl.protocols"));
+      logger.info("Session value for TLS enabled: " + session.getProperty("mail.smtp.starttls.enable"));
     } catch (Exception e) {
       logger.error("SendMail:sendMail: Exception occurred with message = " + e.getMessage(), e);
       response = false;
