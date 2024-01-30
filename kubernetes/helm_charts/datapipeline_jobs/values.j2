@@ -88,7 +88,7 @@ base_config: |
       statebackend {
         blob {
           storage {
-            account = "{{ azure_account }}.blob.core.windows.net"
+            account = "{{ azure_account }}"
             container = "{{ flink_container_name }}"
             checkpointing.dir = "checkpoint"
           }
