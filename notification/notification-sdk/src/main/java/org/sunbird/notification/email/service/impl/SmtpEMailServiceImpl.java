@@ -28,19 +28,24 @@ public class SmtpEMailServiceImpl implements IEmailService {
       logger.info("Email request is null or empty:");
       return false;
       // either email object has bcc or to list size more than 1 then pass it as bcc.
-    } else if (CollectionUtils.isNotEmpty(emailReq.getBcc()) || emailReq.getTo().size() > 1) {
+    } else if (CollectionUtils.isNotEmpty(emailReq.getBcc()) && !emailReq.getTo().isEmpty()) {
       logger.info("Into code block with bcc value");
       return email.sendEmail(
           email.getFromEmail(),
           emailReq.getSubject(),
           emailReq.getBody(),
-          CollectionUtils.isEmpty(emailReq.getBcc()) ? emailReq.getTo() : emailReq.getBcc());
-    } else if (CollectionUtils.isNotEmpty(emailReq.getCc())) {
-      logger.info("Into code block with cc value");
+          emailReq.getBcc(),
+          emailReq.getTo());
+    } else if (CollectionUtils.isNotEmpty(emailReq.getCc()) && !emailReq.getTo().isEmpty()) {
+      logger.info("Into code block with cc values");
       return email.sendMail(
           emailReq.getTo(), emailReq.getSubject(), emailReq.getBody(), emailReq.getCc());
-    } else {
-      logger.info("Into default code block");
+    } else if (CollectionUtils.isNotEmpty(emailReq.getCc()) && CollectionUtils.isNotEmpty(emailReq.getBcc()) && !emailReq.getTo().isEmpty()) {
+      logger.info("Into code block with cc and bcc values");
+      return email.sendMail(emailReq.getTo(), emailReq.getSubject(), emailReq.getBody(), emailReq.getCc(), emailReq.getBcc());
+    }
+    else {
+      logger.info("Into default code block with only To Value");
       return email.sendMail(emailReq.getTo(), emailReq.getSubject(), emailReq.getBody());
     }
   }
