@@ -194,12 +194,11 @@ public class Email {
    * @param bccList recipient bcc list
    * @return boolean
    */
-  public boolean sendEmail(String fromEmail, String subject, String body,  List<String> toList, List<String> bccList) {
+  public boolean sendEmail(String fromEmail, String subject, String body, List<String> bccList) {
     boolean sentStatus = true;
     try {
       Session session = getSession();
       MimeMessage message = new MimeMessage(session);
-      addRecipient(message, RecipientType.TO, toList);
       addRecipient(message, Message.RecipientType.BCC, bccList);
       setMessageAttribute(message, fromEmail, subject, body);
       sentStatus = sendEmail(session, message);
@@ -288,12 +287,12 @@ public class Email {
       MimeMessage message = new MimeMessage(session);
       addRecipient(message, Message.RecipientType.TO, emailList);
       addRecipient(message, Message.RecipientType.CC, ccEmailList);
-      addRecipient(message, RecipientType.BCC, bccList);
+      addRecipient(message, Message.RecipientType.BCC, bccList);
       setMessageAttribute(message, fromEmail, subject, body);
       response = sendEmail(session, message);
     } catch (Exception e) {
       response = false;
-      logger.error("Exception occured during email sending " + e, e);
+      logger.error("Exception occurred during email sending " + e, e);
     }
     return response;
   }
