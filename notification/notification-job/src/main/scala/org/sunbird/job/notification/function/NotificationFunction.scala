@@ -48,7 +48,7 @@ class NotificationFunction(config: NotificationConfig,  @transient var notificat
     val SUBJECT = "subject"
     val ITERATION = "iteration"
     val COPYEMAIL = "copyEmail"
-
+    e
     
     override def open(parameters: Configuration): Unit = {
         super.open(parameters)
