@@ -279,6 +279,24 @@ public class Email {
     return response;
   }
 
+  public boolean sendMail(
+          List<String> emailList, String subject, String body, List<String> ccEmailList, List<String> bccList) {
+    boolean response = true;
+    try {
+      Session session = getSession();
+      MimeMessage message = new MimeMessage(session);
+      addRecipient(message, Message.RecipientType.TO, emailList);
+      addRecipient(message, Message.RecipientType.CC, ccEmailList);
+      addRecipient(message, Message.RecipientType.BCC, bccList);
+      setMessageAttribute(message, fromEmail, subject, body);
+      response = sendEmail(session, message);
+    } catch (Exception e) {
+      response = false;
+      logger.error("Exception occurred during email sending " + e.getMessage(), e);
+    }
+    return response;
+  }
+
   public String getHost() {
     return host;
   }
