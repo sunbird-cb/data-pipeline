@@ -292,7 +292,7 @@ public class Email {
       response = sendEmail(session, message);
     } catch (Exception e) {
       response = false;
-      logger.error("Exception occurred during email sending " + e, e);
+      logger.error("Exception occurred during email sending " + e.getMessage(), e);
     }
     return response;
   }
