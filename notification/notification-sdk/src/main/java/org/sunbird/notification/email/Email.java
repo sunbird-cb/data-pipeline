@@ -77,8 +77,7 @@ public class Email {
     userName = Util.readValue(Constants.EMAIL_SERVER_USERNAME);
     password = Util.readValue(Constants.EMAIL_SERVER_PASSWORD);
     fromEmail = Util.readValue(Constants.EMAIL_SERVER_FROM);
-    isTlsEnabled = Util.readValue(Constants.Is_TLS_Enable);
-    logger.info("TLS enabled is : " + isTlsEnabled);
+    isTlsEnabled = Util.readValue(Constants.EMAIL_SERVER_TLS_ENABLED);
     if (StringUtils.isBlank(host)
         || StringUtils.isBlank(port)
         || StringUtils.isBlank(userName)
@@ -100,7 +99,6 @@ public class Email {
 
   private Session getSession() {
     if (session == null) {
-      logger.info("props Value being set, props : " + props);
       session = Session.getInstance(props, new GMailAuthenticator(userName, password));
     }
     return session;
@@ -115,13 +113,9 @@ public class Email {
      */
     props.put("mail.smtp.auth", "true");
     props.put("mail.smtp.port", port);
-    logger.info("The value of TLS Enabled is : " + isTlsEnabled);
-    props.put("mail.smtp.starttls.enable", "true");
-    props.put("mail.smtp.ssl.protocols", "TLSv1.2");
-    if ("true".equalsIgnoreCase(isTlsEnabled)) {
-      logger.info("Values for TLS enabling being set");
-      props.put("mail.smtp.starttls.enable", "true");
-      props.put("mail.smtp.ssl.protocols", "TLSv1.2");
+    if (Constants.TRUE.equalsIgnoreCase(isTlsEnabled)) {
+      props.put("mail.smtp.starttls.enable", Constants.TRUE);
+      props.put("mail.smtp.ssl.protocols", Constants.TLS_VERSION_V1_2);
     }
   }
 
@@ -202,7 +196,6 @@ public class Email {
       addRecipient(message, Message.RecipientType.BCC, bccList);
       setMessageAttribute(message, fromEmail, subject, body);
       sentStatus = sendEmail(session, message);
-      logger.info("status of mail sent is : " + sentStatus);
     } catch (Exception e) {
       sentStatus = false;
       logger.error("SendMail:sendMail: Exception occurred with message = " + e.getMessage(), e);
