@@ -9,4 +9,7 @@ public class Constants {
   public static final String EMAIL_SERVER_USERNAME = "sunbird_mail_server_username";
   public static final String FROM_EMAIL = "fromEmail";
   public static final String EMAIL_ORG_IMG_URL = "orgImageUrl";
+  public static final String EMAIL_SERVER_TLS_ENABLED = "mail_server_use_tls";
+  public static final String TRUE = "true";
+  public static final String TLS_VERSION_V1_2 = "TLSv1.2";
 }

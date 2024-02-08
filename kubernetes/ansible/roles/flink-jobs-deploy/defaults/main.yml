@@ -104,6 +104,7 @@ merge_user_courses_course_date_format: "yyyy-MM-dd HH:mm:ss:SSSZ"
 ###  Notification Job related Vars
 notification_job_consumer_parallelism: 1
 notification_job_parallelism: 1
+mail_server_use_tls: "true"
 
 ### assessment-aggregator related vars
 assessaggregator_parallelism: 1

@@ -47,6 +47,7 @@ class NotificationFunction(config: NotificationConfig,  @transient var notificat
     val MID = "mid"
     val SUBJECT = "subject"
     val ITERATION = "iteration"
+    val COPYEMAIL = "copyEmail"
     
     
     override def open(parameters: Configuration): Unit = {
@@ -125,7 +126,9 @@ class NotificationFunction(config: NotificationConfig,  @transient var notificat
         val config = notificationMap.get(CONFIG).get.asInstanceOf[scala.collection.immutable.Map[String, AnyRef]].asJava
         val subject = config.get(SUBJECT).asInstanceOf[String]
         val emailText = templateMap.get(DATA).asInstanceOf[String]
-        val emailRequest = new EmailRequest(subject, emailIds, null, null, "", emailText, null)
+        val copyEmail : util.List[String] = notificationMap.get(COPYEMAIL).get.asInstanceOf[List[String]].asJava
+        logger.debug("cc value for email is : " + copyEmail)
+        val emailRequest = new EmailRequest(subject, emailIds, copyEmail, null, "", emailText, null)
         notificationUtil.sendEmail(emailRequest)
     }
     

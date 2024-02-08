@@ -39,6 +39,7 @@ public class Email {
   private String password;
   private String fromEmail;
   private Session session;
+  private String isTlsEnabled;
 
   public Email() {
     init();
@@ -76,6 +77,7 @@ public class Email {
     userName = Util.readValue(Constants.EMAIL_SERVER_USERNAME);
     password = Util.readValue(Constants.EMAIL_SERVER_PASSWORD);
     fromEmail = Util.readValue(Constants.EMAIL_SERVER_FROM);
+    isTlsEnabled = Util.readValue(Constants.EMAIL_SERVER_TLS_ENABLED);
     if (StringUtils.isBlank(host)
         || StringUtils.isBlank(port)
         || StringUtils.isBlank(userName)
@@ -111,6 +113,10 @@ public class Email {
      */
     props.put("mail.smtp.auth", "true");
     props.put("mail.smtp.port", port);
+    if (Constants.TRUE.equalsIgnoreCase(isTlsEnabled)) {
+      props.put("mail.smtp.starttls.enable", Constants.TRUE);
+      props.put("mail.smtp.ssl.protocols", Constants.TLS_VERSION_V1_2);
+    }
   }
 
   /**
@@ -257,6 +263,24 @@ public class Email {
           logger.error(e.toString(), e);
         }
       }
+    }
+    return response;
+  }
+
+  public boolean sendMail(
+          List<String> emailList, String subject, String body, List<String> ccEmailList, List<String> bccList) {
+    boolean response = true;
+    try {
+      Session session = getSession();
+      MimeMessage message = new MimeMessage(session);
+      addRecipient(message, Message.RecipientType.TO, emailList);
+      addRecipient(message, Message.RecipientType.CC, ccEmailList);
+      addRecipient(message, Message.RecipientType.BCC, bccList);
+      setMessageAttribute(message, fromEmail, subject, body);
+      response = sendEmail(session, message);
+    } catch (Exception e) {
+      response = false;
+      logger.error("Exception occurred during email sending " + e.getMessage(), e);
     }
     return response;
   }
