@@ -127,7 +127,7 @@ class NotificationFunction(config: NotificationConfig,  @transient var notificat
         val subject = config.get(SUBJECT).asInstanceOf[String]
         val emailText = templateMap.get(DATA).asInstanceOf[String]
         val copyEmail : util.List[String] = notificationMap.get(COPYEMAIL).get.asInstanceOf[List[String]].asJava
-        logger.info("cc value for email is : " + copyEmail)
+        logger.debug("cc value for email is : " + copyEmail)
         val emailRequest = new EmailRequest(subject, emailIds, copyEmail, null, "", emailText, null)
         notificationUtil.sendEmail(emailRequest)
     }
