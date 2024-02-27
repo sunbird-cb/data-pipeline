@@ -126,7 +126,8 @@ class NotificationFunction(config: NotificationConfig,  @transient var notificat
         val config = notificationMap.get(CONFIG).get.asInstanceOf[scala.collection.immutable.Map[String, AnyRef]].asJava
         val subject = config.get(SUBJECT).asInstanceOf[String]
         val emailText = templateMap.get(DATA).asInstanceOf[String]
-        val copyEmail : util.List[String] = notificationMap.get(COPYEMAIL).get.asInstanceOf[List[String]].asJava
+        val javaMap: util.HashMap[String, AnyRef] = new util.HashMap(notificationMap.asJava)
+val copyEmail: util.List[String] = javaMap.getOrDefault(COPYEMAIL, new util.ArrayList[String]()).asInstanceOf[util.List[String]]
         logger.debug("cc value for email is : " + copyEmail)
         val emailRequest = new EmailRequest(subject, emailIds, copyEmail, null, "", emailText, null)
         notificationUtil.sendEmail(emailRequest)
